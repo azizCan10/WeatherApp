@@ -10,6 +10,8 @@ public class Constants {
     public static String ACCESS_KEY_PARAM = "?access_key=";
     public static String QUERY_KEY_PARAM = "&query=";
 
+    public final static String CACHE_NAME = "weathers";
+
     @Value("${weather-stack.api-url}")
     public void setApiUrl(String apiUrl) {
         API_URL = apiUrl;
