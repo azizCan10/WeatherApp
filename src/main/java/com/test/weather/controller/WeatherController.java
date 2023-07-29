@@ -3,7 +3,6 @@ package com.test.weather.controller;
 import com.test.weather.controller.validation.CityNameConstraint;
 import com.test.weather.dto.WeatherDto;
 import com.test.weather.service.WeatherService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
