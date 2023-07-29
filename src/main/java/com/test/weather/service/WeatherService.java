@@ -2,6 +2,7 @@ package com.test.weather.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.test.weather.constants.Constants;
 import com.test.weather.dto.WeatherDto;
 import com.test.weather.dto.WeatherResponse;
 import com.test.weather.model.Weather;
@@ -20,7 +21,6 @@ import java.util.Optional;
 @Service
 public class WeatherService {
 
-    private static final String API_URL = "http://api.weatherstack.com/current?access_key=YOUR_API_KEY&query=";
     private final WeatherRepository weatherRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -28,16 +28,17 @@ public class WeatherService {
     public WeatherDto getWeatherByCityName(String city) {
         Optional<Weather> weatherOptional = weatherRepository.findFirstByRequestedCityNameOrderByUpdatedTimeDesc(city);
 
-        if (weatherOptional.isEmpty()) {
-            return WeatherDto.toDto(getWeatherFromWeatherStack(city));
-        }
-
-        return WeatherDto.toDto(weatherOptional.get());
+        return weatherOptional.map(weather -> {
+            if (weather.getUpdatedTime().before(new Date(System.currentTimeMillis() + 1800000))) {
+                return WeatherDto.toDto(getWeatherFromWeatherStack(city));
+            }
+            return WeatherDto.toDto(weather);
+        }).orElseGet(() -> WeatherDto.toDto(getWeatherFromWeatherStack(city)));
     }
 
 
     private Weather getWeatherFromWeatherStack(String city) {
-        ResponseEntity<String> responseEntity =  restTemplate.getForEntity(API_URL + city, String.class);
+        ResponseEntity<String> responseEntity =  restTemplate.getForEntity(getWeatherStackUrl(city), String.class);
 
         try {
             WeatherResponse weatherResponse = objectMapper.readValue(responseEntity.getBody(), WeatherResponse.class);
@@ -45,6 +46,10 @@ public class WeatherService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getWeatherStackUrl(String city) {
+        return Constants.API_URL + Constants.ACCESS_KEY_PARAM + Constants.API_KEY + Constants.QUERY_KEY_PARAM + city;
     }
 
     private Weather saveWeather(String city, WeatherResponse weatherResponse) {
