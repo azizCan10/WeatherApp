@@ -16,6 +16,7 @@ This Java application utilizes the WeatherStack API to provide real-time weather
 * H2 Database
 * Weatherstack API
 * Open API
+* Docker
 
 
 ## Getting Started
